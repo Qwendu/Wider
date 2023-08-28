@@ -4,6 +4,7 @@ get_plugin :: () -> *Metaprogram_Plugin
 {
 	plug := New(Widener);
 	plug.message = xx message;
+	plug.finish  = xx finish;
 
 
 	
@@ -46,14 +47,45 @@ message :: (using plug : *Widener, msg : *Message)
 		tc := cast(*Message_Typechecked)msg;
 		for tc.procedure_headers
 		{
-			if has_Note(it.expression, Annotation)
+			procedure := it.expression;
+			if has_Note(procedure, Annotation)
 			{
-				array_add(*procs, Widened_Procedure.{original = it.expression});
+				array_add(*procs, Widened_Procedure.{original = procedure});
 			}
-			is_reference, note := has_Note_Starting_With(it.expression, Annotation_Reference);
+			is_reference, note := has_Note_Starting_With(procedure, Annotation_Reference);
 			if is_reference
 			{
-				log("% widened from %", it.expression.name, note);
+
+				_, _, remainder := split_from_left(note, #char "(");
+
+				found_comma, function, wideness_rest := split_from_left(remainder, #char ",");
+				assert(found_comma);
+				
+
+				wide, succ := parse_int(*wideness_rest);
+
+				index_of_proc := -1;
+				for procs
+				{
+					if function == it.original.name
+					{	
+						index_of_proc = it_index;
+						break;
+					}
+				}
+				if index_of_proc >= 0
+				{
+					if wide == 2
+					{
+						procs[index_of_proc].widened[Wide.x2] = procedure;
+					}else if wide == 4
+					{
+						procs[index_of_proc].widened[Wide.x4] = procedure;
+					}else if wide == 8
+					{
+						procs[index_of_proc].widened[Wide.x8] = procedure;
+					}
+				}
 			}
 		}
 	}
@@ -86,6 +118,21 @@ message :: (using plug : *Widener, msg : *Message)
 		generate_Widened_Proc(it.original, plug.workspace ,4);
 		generate_Widened_Proc(it.original, plug.workspace, 8);
 		it.done = true;
+	}
+}
+
+finish :: (using plug : *Widener)
+{
+	log("Wider Report:");
+	log("% Procedures", procs.count);
+	for procs
+	{
+		log("%:", it.original.name);
+		for w: it.widened
+		{
+			log("\t-> %", w.name);
+		}
+		
 	}
 }
 
@@ -222,7 +269,6 @@ widen_Procedure :: (header : *Code_Procedure_Header, wide : int) -> *Code_Proced
 		new_block.statements[new_block.statements.count - 1] = ret;
 
 	}
-	log("Widnening Procedure % to %", header.name, new_header.name);
 	return new_header;
 }
 
