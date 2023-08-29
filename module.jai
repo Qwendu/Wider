@@ -114,8 +114,8 @@ message :: (using plug : *Widener, msg : *Message)
 			}
 			add_build_string(decl_as_string, workspace, cast(*Message)null);
 		}
-		generate_Widened_Proc(it.original, plug.workspace ,2);
-		generate_Widened_Proc(it.original, plug.workspace ,4);
+		generate_Widened_Proc(it.original, plug.workspace, 2);
+		generate_Widened_Proc(it.original, plug.workspace, 4);
 		generate_Widened_Proc(it.original, plug.workspace, 8);
 		it.done = true;
 	}
