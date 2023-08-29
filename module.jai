@@ -130,7 +130,7 @@ finish :: (using plug : *Widener)
 		log("%:", it.original.name);
 		for w: it.widened
 		{
-			log("\t-> %", w.name);
+			if w  log("\t-> %", w.name);
 		}
 		
 	}
@@ -143,10 +143,17 @@ widen_Procedure :: (header : *Code_Procedure_Header, wide : int) -> *Code_Proced
 	new_header := New(Code_Procedure_Header);
 	new_header.* = header.*;
 	new_header.name = sprint("%_x%", header.name, wide);
-	new_header.notes = NewArray(1, *Code_Note);
+	new_header.notes = NewArray(1 + header.notes.count - 1, *Code_Note);
+	note_base := 0;
+	for header.notes
+	{
+		if it.text == Annotation  continue; // Dont widen the widened
+		new_header.notes[note_base] = it;
+		note_base += 1;
+	}
 	note := New(Code_Note);
 	note.text = sprint("%(%,%)", Annotation_Reference, header.name, wide);
-	new_header.notes[0] = note;
+	new_header.notes[new_header.notes.count - 1] = note;
 
 	new_header.arguments = NewArray(header.arguments.count, *Code_Declaration);
 	new_header.returns   = NewArray(header.returns  .count, *Code_Declaration);

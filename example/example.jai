@@ -2,7 +2,7 @@ foo :: (a : s32, b : s32) -> s32, r_2 : s32
 {
 	r : s32 = 3 + a;
 	return b * r + 1, 0;
-} @Widen
+} @Widen @Disassemble
 
 main :: ()
 {
