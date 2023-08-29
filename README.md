@@ -11,3 +11,8 @@ for(int i = 0; i < width; i++0)
 this code has been written over a lunch break, because WHY does LLVM not widen my functions ._. .
 
 Proof of concept.
+
+# Does not work ...
+Apparently clang does not like to vectorize things that look like this.
+Sadge.
+https://godbolt.org/z/MqfnP9x9s
